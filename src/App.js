@@ -3,31 +3,38 @@ import axios from 'axios';
 import './App.css';
 import { List, ListItem, Typography, ListItemText, Avatar, ListItemAvatar, Divider, ListSubheader, Box } from '@mui/material';
 import { useEffect, useState ,Fragment, React, useLayoutEffect } from 'react';
+import { api } from './service/api';
+import Modal from 'react-modal';
+
 
 function App() {
 
-  async function getAnotacoes() {
-    try {
-      const response = await axios.get('http://localhost:8080/dinamica/anotacoes/listar');
-      setAnotacoes(response.data)
-      console.log(response);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  const [lista, setLista]  = useState([])
+  const [modalIsOpen, setIsOpen] = useState(false);
+  const [modal, setModal] = useState(false)
 
-  const [anotacoes, setAnotacoes] = useState([])
+
+const getLista = async() => {
+  const res = await api.get("/anotacoes/listar");
+
+  setLista(res.data);
+}
 
   useEffect(() => {
-    getAnotacoes()
+    getLista();
   }, [])
 
   useLayoutEffect(() => {
     document.body.style.backgroundColor = "#1C1C1C"
   });
 
+
+  const deleteRandom = () => {
+
+  }
+
   return (
-    <Box width='100%' height='45vw' display='flex' flexDirection='row' justifyContent='center' alignItems='center'>
+    <Box style={{display:"flex", flexDirection:"Column"}} width='100%' height='45vw' display='flex' flexDirection='row' justifyContent='center' alignItems='center'>
         <List sx={{
           width: '100%',
           maxWidth: 360,
@@ -36,23 +43,55 @@ function App() {
           overflow: 'auto',
           maxHeight: 300,
           '& ul': { padding: 0 }}}
-          subheader={
-            <ListSubheader component="div" id="nested-list-subheader">
-              Anotações
-            </ListSubheader>
-          }
+          
         >
           {
-          anotacoes.map((anotacao, index) => 
+          lista.map((anotacao, index) => 
             <>
               <ListItem>
-                <ListItemText primary={anotacao.titulo} secondary={`Código: ${anotacao.codigo}`}/>
+                <button id='buttonPlus' onClick={deleteRandom()}>
+                  X
+                </button>
+                <button id='buttonMinus' onClick={() => setModal(true)}>
+                  -
+                </button>
+                <ListItemText primary={anotacao.titulo} secondary={anotacao.descricao}/>
               </ListItem>
-              {anotacoes.length -1 !== index && <Divider/>}
+              {lista.length -1 !== index && <Divider/>}
             </>
             )            
           }
         </List>
+        <Modal
+        isOpen={modalIsOpen}
+    
+        contentLabel="Example Modal"
+      >
+        <h2>Hello</h2>
+        <button onClick={() => setIsOpen(false)}>close</button>
+        <div>I am a modal</div>
+        <form>
+          <input placeholder='Título' />
+          <input placeholder='Descrição' />
+          <button type='submit'>Criar</button>
+        </form>
+      </Modal>
+        <button className='create' onClick={() => setIsOpen(true)} >Criar Anotação</button>
+       
+        <Modal
+        isOpen={modal} 
+    
+        contentLabel="Example Modal"
+      >
+        <h2>Hello</h2>
+        <button onClick={() => setModal(false)}>close</button>
+        <div>I am a modal</div>
+        <form>
+          <input placeholder='Título' />
+          <input placeholder='Descrição' />
+          <button type='submit'>Criar</button>
+        </form>
+      </Modal>
     </Box>
   );
 }
